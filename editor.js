@@ -395,6 +395,17 @@ var expEd = function() {
 				onError: function(callback) {
 					f_onError = callback;
 				},
+				
+				loadExpression: function(expression) {
+					var tokensToLookFor = [],
+						operators = ['OR', 'AND'];
+					
+					for(var i = 0; i < data.length; i++) { 
+						tokensToLookFor = tokensToLookFor.concat(data[i].values);
+					}
+					
+					var a = '';
+				}
 			}	
 		}
 	}
@@ -407,6 +418,7 @@ $(document).ready(function () {
 	
 	editor.createUI();
 	editor.onError(function(msg) { alert(msg) });
+	editor.loadExpression('r=RoleA AND r=RoleB');
 	
 	$('#add-or').click(function(e) { editor.addToken('OR') });
 	$('#add-and').click(function(e) { editor.addToken('AND') });
