@@ -5,11 +5,56 @@
 		<script src="lib/LinkedList.js"></script>
 		<script src="editor.js"></script>
 		<link rel="stylesheet" href="editor.css" type="text/css" />
-	</head>
-	<body>
-		<div id="controls">
-		</div>
-		<div id="buttons">
+		<script type="text/javascript">
+			$(document).ready( function () {
+				var $controlsContainer = $('#controls'),
+				$expressionContainer = $('#expression'),
+				data = [{
+					name: 'Roles',
+					prefix: 'r=',
+					values: ['RoleA', 'RoleB', 'RoleC']
+				},{
+					name: 'Groups',
+					prefix: 'g=',
+					values: ['Group1', 'Group2', 'Group3', 'Group4']
+				},{
+					name: 'Attributes',
+					prefix: 'a=',
+					values: ['Attr1', 'Attr2']
+				}],
+				editor = new expEd.Editor($controlsContainer, $expressionContainer, data);
+
+				editor.createUI();
+				editor.onError( function(msg) {
+					alert(msg)
+				});
+				$('#add-or').click( function(e) {
+					editor.addToken('OR')
+				});
+				$('#add-and').click( function(e) {
+					editor.addToken('AND')
+				});
+				$('#group').click( function(e) {
+					editor.groupSelected()
+				});
+				$('#show').click( function(e) {
+					$('#text').text(editor.toString());
+				});
+				$('#unselect').click( function(e) {
+					editor.unselectAll();
+				});
+				$('#remove').click( function(e) {
+					editor.removeSelected();
+				});
+				$('#clear-all').click( function(e) {
+					editor.clearAll();
+				});
+			});
+		</script>
+		<body>
+			<div id="controls">
+			</div>
+			<div id="buttons">
 				<input type="button" id="add-or" value="Add Or Operator" />
 				<input type="button" id="add-and" value="Add And Operator" />
 				<input type="button" id="group" value="Group/Ungroup Selected" />
@@ -17,10 +62,10 @@
 				<input type="button" id="unselect" value="Unselect All" />
 				<input type="button" id="remove" value="Remove Selected" />
 				<input type="button" id="clear-all" value="Clear All" />
-		</div>
-		<div id="expression">
-		</div>
-		</div>
-		<div id="text">
-	</body>
+			</div>
+			<div id="expression">
+			</div>
+			</div>
+			<div id="text">
+		</body>
 </html>
