@@ -1,357 +1,423 @@
 var expEd = function() {
 
-	return {
+    return {
 
-		Token: function(value, text) {
-			var v = value,
-			t = text,
-			f_onSelect = null,
-			f_onDeselect = null,
-			$obj = $('<div>');
+        Token: function(value, text) {
+            var v = value,
+            t = text,
+            f_onSelect = null,
+            f_onDeselect = null,
+            $obj = $('<div>');
 
-			return {
-				onSelect: function(callback) {
-					f_onSelect = callback;
-				},
-				onDeselect: function(callback) {
-					f_onDeselect = callback;
-				},
-				select: function() {
-					if(this.getIsSelected()) {
-						f_onDeselect(this);
-						$obj.removeClass('selected');
-					} else {
-						f_onSelect(this);
-						$obj.addClass('selected');
-					}
-				},
-				getIsSelected: function() {
-					return $obj.hasClass('selected');
-				},
-				getIsToken: function() {
-					return v.constructor === String && this.getIsOperator() === false;
-				},
-				getIsGroup: function() {
-					return this.getIsOperator() === false && this.getIsToken() === false;
-				},
-				getIsOperator: function() {
-					return v === 'OR' || v === 'AND';
-				},
-				getText: function() {
-					return t;
-				},
-				getValue: function() {
-					return v;
-				},
-				Obj: function() {
-					var that = this;
+            return {
+                onSelect: function(callback) {
+                    f_onSelect = callback;
+                },
 
-					//Had to unbind those events because they were being called N times
-					//where N is the number of times that "Obj()" is being called
-					//The good thing would be to bind these events only once, but somehow
-					//the "that" used in the click event does not work outside this closure
-					//that is returned as a result to "new Token()" call
-					$obj.text(t)
-					.addClass('selectable')
-					.addClass('token')
-					.unbind('mouseover')
-					.unbind('mouseout')
-					.unbind('click')
-					.mouseover( function(e) {
-						$(this).addClass('selectableHover')
-					})
-					.mouseout( function (e) {
-						$(this).removeClass('selectableHover')
-					})
-					.click( function(e) {
-						that.select()
-					});
-					return $obj;
-				}
-			}
-		},
-		Editor: function (expressionContainer, data, options) {
-			var controls = null,
-			expression = expressionContainer,
-			built = new LinkedList(),
-			f_onError = null,
-			selected = [],
-			blockOperatorSequence = (options && options.blockOperatorSequence != null) ? options.blockOperatorSequence : true,
-			blockTokenSequence = (options && options.blockTokenSequence != null) ? options.blockTokenSequence : true;
+                onDeselect: function(callback) {
+                    f_onDeselect = callback;
+                },
 
-			var createToken = function(tv, tt) {
-				var token = new expEd.Token(tv, tt);
+                select: function() {
+                    if(this.getIsSelected()) {
+                        f_onDeselect(this);
+                        $obj.removeClass('selected');
+                    }
+                    else {
+                        f_onSelect(this);
+                        $obj.addClass('selected');
+                    }
+                },
 
-				token.onSelect( function(t) {
-					selected.push(t)
-				});
-				token.onDeselect( function(t) {
-					var selectedCount = selected.length;
+                getIsSelected: function() {
+                    return $obj.hasClass('selected');
+                },
 
-					for(var i = 0; i < selectedCount; i++) {
-						if(selected[i] === t) {
-							selected.splice(i, 1);
-							return;
-						}
-					}
-				});
-				return token;
-			};
-			var validateInsert = function(previousToken, newToken) {
-				var valid = false;
+                getIsToken: function() {
+                    return v.constructor === String && this.getIsOperator() === false;
+                },
 
-				if(newToken.getIsOperator()) {
-					valid = previousToken != null && (previousToken.getIsGroup() || previousToken.getIsToken());
-				} else if(newToken.getIsToken() || newToken.getIsGroup()) {
-					valid = previousToken == null || previousToken.getIsOperator();
-				}
+                getIsGroup: function() {
+                    return this.getIsOperator() === false && this.getIsToken() === false;
+                },
 
-				return valid;
-			}
-			return {
+                getIsOperator: function() {
+                    return v === '|' || v === '&';
+                },
 
-				createUI: function(controlsContainer) {
-					var that = this,
-					dataCount = data.length;
-					
-					controls = controlsContainer;
+                getText: function() {
+                    return t;
+                },
 
-					for(var i = 0; i < dataCount; i++) {
-						var $label = $('<label>'),
-						$select = $('<select>'),
-						$addButton = $('<input type="button" value="Add">'),
-						$br = $('<br>'),
-						_data = data[i];
+                getValue: function() {
+                    return v;
+                },
 
-						$label.text(data[i].name);
+                Obj: function() {
+                    var that = this;
 
-						$addButton.click( function(s) {
-							return function() {
-								that.addToken(s.find('option:selected').val());
-							}
-						}($select));
-						var valuesCount = _data.values.length;
+                    //Had to unbind those events because they were being called N
+                    // times
+                    //where N is the number of times that "Obj()" is being called
+                    //The good thing would be to bind these events only once, but
+                    // somehow
+                    //the "that" used in the click event does not work outside
+                    // this closure
+                    //that is returned as a result to "new Token()" call
+                    $obj.text(t)
+                    .addClass('selectable')
+                    .addClass('token')
+                    .unbind('mouseover')
+                    .unbind('mouseout')
+                    .unbind('click')
+                    .mouseover( function(e) {
+                        $(this).addClass('selectableHover')
+                    })
 
-						for(var y = 0; y < valuesCount; y++) {
-							var $option = $('<option value="'+ _data.prefix + _data.values[y] + '">' + _data.values[y] + '</option>');
-							$select.append($option);
-						}
+                    .mouseout( function (e) {
+                        $(this).removeClass('selectableHover')
+                    })
 
-						controls.append($label);
-						controls.append($select);
-						controls.append($addButton);
-						controls.append($br);
-					}
-				},
-				getLength: function() {
-					return built.getSize();
-				},
-				addToken: function(t) {
-					var selectedCount = selected.length,
-					newToken = createToken(t,t);
+                    .click( function(e) {
+                        that.select()
+                    });
 
-					if(selectedCount === 0) {
-						var previousToken = built.getTail() != null ? built.getTail().getValue() : null;
+                    return $obj;
+                }
 
-						if(validateInsert(previousToken, newToken)) {
-							expression.append(newToken.Obj());
-							built.add(newToken);
-						} else {
-							if(f_onError) {
-								f_onError('Tokens can only be added after operators and operators can only be added after tokens');
-								return;
-							}
-						}
-					} else {
-						for(var i = selectedCount - 1; i >= 0; i--) {
-							var selectedToken = selected[i];
+            }
+        },
 
-							if(validateInsert(selectedToken, newToken)) {
-								selectedToken.select();
-								selectedToken.Obj().after(newToken.Obj());
-								built.insertAfter(selectedToken, newToken);
+        Editor: function (expressionContainer, data, options) {
+            var controls = null,
+            expression = expressionContainer,
+            built = new LinkedList(),
+            f_onError = null,
+            selected = [],
+            blockOperatorSequence = (options && options.blockOperatorSequence != null) ? options.blockOperatorSequence : true,
+            blockTokenSequence = (options && options.blockTokenSequence != null) ? options.blockTokenSequence : true;
 
-								selected.splice(i, 1);
-							} else {
-								if(f_onError) {
-									f_onError('Tokens can only be added after operators and operators can only be added after tokens');
-								}
-							}
-						}
-					}
-				},
-				groupSelected: function() {
-					var selectedCount = selected.length;
+            var createToken = function(tv, tt) {
+                var token = new expEd.Token(tv, tt);
 
-					if(selectedCount === 0) {
-						return;
-					} else if(selectedCount === 1 && !selected[0].getIsToken()) {
-						var selectedToken = selected[0],
-						selectedLL = selectedToken.getValue();
+                token.onSelect( function(t) {
+                    selected.push(t)
+                });
 
-						for(var currentNode = selectedLL.getHead(); currentNode; currentNode = currentNode.getNext()) {
+                token.onDeselect( function(t) {
+                    var selectedCount = selected.length;
 
-							if(currentNode.getPrevious() != null && currentNode.getNext() != null) {
-								var currentToken = currentNode.getValue();
-								built.insertBefore(selectedToken, currentToken);
-								selectedToken.Obj().before(currentToken.Obj());
-							}
+                    for(var i = 0; i < selectedCount; i++) {
+                        if(selected[i] === t) {
+                            selected.splice(i, 1);
+                            return;
+                        }
+                    }
+                });
 
-							if(currentNode.getNext() === null) {
-								selectedToken.select();
-								selectedToken.Obj().remove();
-								built.remove(selectedToken);
-							}
-						}
+                return token;
+            };
 
-					} else if(selectedCount === 1 && selected[0].getIsToken()) {
-						if(f_onError) {
-							f_onError('More then one token should be selected to make a group');
-						}
-					} else if(selectedCount >= 2) {
-						var mostLeftSelectedNode = null,
-						mostRightSelectedNode = null,
-						group = new LinkedList(),
-						groupToken = null,
-						groupText = '',
-						selectedToken = null;
+            var validateInsert = function(previousToken, newToken, nextToken) {
+                var valid = false;
 
-						var linkedListToString = function(ll) {
-							var t = '';
+                if(newToken.getIsOperator()) {
+                    valid = previousToken != null &&
+                    (previousToken.getIsGroup() || previousToken.getIsToken()) &&
+                    (nextToken == null || nextToken.getIsGroup() || nextToken.getIsToken());
+                }
+                else if(newToken.getIsToken() || newToken.getIsGroup()) {
+                    valid = (previousToken == null || previousToken.getIsOperator()) &&
+                    (nextToken == null || nextToken.getIsOperator());
+                }
 
-							for(var currentNode = ll.getHead(); currentNode; currentNode = currentNode.getNext()) {
-								t += currentNode.getValue().getText();
-								t += ' ';
-							}
+                return valid;
+            }
 
-							return t;
-						}
-						for(var currentNode = built.getHead(); currentNode; currentNode = currentNode.getNext()) {
-							var index = selected.indexOf(currentNode.getValue());
-							if(index > -1) {
-								mostLeftSelectedNode = currentNode;
-								break;
-							}
-						}
+            return {
 
-						for(var currentNode = mostLeftSelectedNode; currentNode; currentNode = currentNode.getNext()) {
-							var index = selected.indexOf(currentNode.getValue());
-							if(index > -1) {
-								mostRightSelectedNode = currentNode;
-							}
-						}
+                createUI: function(controlsContainer) {
+                    var that = this,
+                    dataCount = data.length;
 
-						var mostLeftSelectedToken = mostLeftSelectedNode.getValue(),
-						mostRightSelectedToken = mostRightSelectedNode.getValue();
+                    controls = controlsContainer;
 
-						if( (mostLeftSelectedToken.getIsToken() === false && mostLeftSelectedToken.getIsGroup() === false) ||
-						(mostRightSelectedToken.getIsToken() === false && mostRightSelectedToken.getIsGroup() === false) ) {
-							f_onError('Left and right parts of a group cannot be operators');
-							return;
-						}
+                    for(var i = 0; i < dataCount; i++) {
+                        var $label = $('<label>'),
+                        $select = $('<select>'),
+                        $addButton = $('<input type="button" value="Add">'),
+                        $br = $('<br>'),
+                        _data = data[i];
 
-						var currentNode = mostLeftSelectedNode,
-						currentToken = null,
-						leftParenthesis = createToken('(', '('),
-						rightParenthesis = createToken(')', ')');
+                        $label.text(data[i].name);
 
-						group.add(leftParenthesis);
-						group.add(currentNode.getValue());
+                        $addButton.click( function(s) {
+                            return function() {
+                                that.addToken(s.find('option:selected').val());
+                            }
 
-						do {
-							currentNode = currentNode.getNext();
-							currentToken = currentNode.getValue();
+                        }($select));
 
-							if(!currentToken.getIsSelected()) {
-								currentToken.select();
-							}
+                        var valuesCount = _data.values.length;
 
-							group.add(currentToken);
-						} while(currentNode != mostRightSelectedNode);
-						group.add(rightParenthesis);
+                        for(var y = 0; y < valuesCount; y++) {
+                            var tokenValue = '',
+                            tokenText = _data.values[y],
+                            $option = null;
 
-						groupText = linkedListToString(group);
-						groupToken = createToken(group, groupText);
+                            if(_data.prefix != null) {
+                                tokenValue = _data.prefix;
+                            }
 
-						selectedCount = selected.length;
+                            tokenValue = tokenValue + tokenText;
 
-						for(var i = selectedCount - 1; i >= 0; i--) {
-							selectedToken = selected[i];
-							selectedToken.select();
+                            if(_data.sufix != null) {
+                                tokenValue = tokenValue + _data.sufix;
+                            }
 
-							if(i === 0) {
-								selectedToken.Obj().before(groupToken.Obj());
-								built.insertBefore(selectedToken, groupToken);
-							}
+                            $option = $('<option value="' + tokenValue + '">' + tokenText + '</option>');
 
-							selectedToken.Obj().remove();
-							built.remove(selectedToken);
+                            $select.append($option);
+                        }
 
-							selected.splice(i, 1);
-						}
-					}
+                        controls.append($label);
+                        controls.append($select);
+                        controls.append($addButton);
+                        controls.append($br);
+                    }
+                },
 
-				},
-				removeSelected: function() {
-					var selectedCount = selected.length;
+                getLength: function() {
+                    return built.getSize();
+                },
 
-					if(selectedCount === 0) {
-						return;
-					} else {
-						var selectedToken = null;
+                addToken: function(t) {
+                    var selectedCount = selected.length,
+                    newToken = createToken(t,t);
 
-						for(var i = selectedCount - 1; i >= 0; i--) {
-							selectedToken = selected[i];
-							selectedToken.select();
+                    if(selectedCount === 0) {
+                        var previousToken = built.getTail() != null ? built.getTail().getValue() : null,
+                        nextToken = null;
 
-							selectedToken.Obj().remove();
-							built.remove(selectedToken);
+                        if(validateInsert(previousToken, newToken, nextToken)) {
+                            expression.append(newToken.Obj());
+                            built.add(newToken);
+                        }
+                        else {
+                            if(f_onError) {
+                                f_onError('Tokens can only be added after operators and operators can only be added after tokens');
+                                return;
+                            }
+                        }
+                    }
+                    else {
+                        for(var i = selectedCount - 1; i >= 0; i--) {
+                            var selectedToken = selected[i],
+                                selectedNode = built.find(selectedToken),
+                                nextToken = selectedNode.getNext() != null ? selectedNode.getNext().getValue() : null;    
 
-							selected.splice(i, 1);
-						}
-					}
-				},
-				unselectAll: function() {
-					var selectedCount = selected.length;
+                            if(validateInsert(selectedToken, newToken, nextToken)) {
+                                selectedToken.select();
+                                selectedToken.Obj().after(newToken.Obj());
+                                built.insertAfter(selectedToken, newToken);
 
-					if(selectedCount === 0) {
-						return;
-					} else {
-						for(var i = selectedCount - 1; i >= 0; i--) {
-							selected[i].select();
-						}
-					}
-				},
-				clearAll: function() {
-					for(var currentNode = built.getHead(); currentNode; currentNode = currentNode.getNext()) {
-						currentNode.getValue().Obj().remove();
-						built.remove(currentNode.getValue());
-					}
-				},
-				toString: function() {
-					var t = '';
+                                selected.splice(i, 1);
+                            }
+                            else {
+                                if(f_onError) {
+                                    f_onError('Tokens can only be added after operators and operators can only be added after tokens');
+                                }
+                            }
+                        }
+                    }
+                },
 
-					for(var currentNode = built.getHead(); currentNode; currentNode = currentNode.getNext()) {
-						t += currentNode.getValue().getText();
-						t += ' ';
-					}
+                groupSelected: function() {
+                    var selectedCount = selected.length;
 
-					return t;
-				},
-				onError: function(callback) {
-					f_onError = callback;
-				},
-				loadExpression: function(expression) {
-					var tokensToLookFor = [],
-					operators = ['OR', 'AND'];
+                    if(selectedCount === 0) {
+                        return;
+                    }
+                    else if(selectedCount === 1 && !selected[0].getIsToken()) {
+                        var selectedToken = selected[0],
+                        selectedLL = selectedToken.getValue();
 
-					for(var i = 0; i < data.length; i++) {
-						tokensToLookFor = tokensToLookFor.concat(data[i].values);
-					}
+                        for(var currentNode = selectedLL.getHead(); currentNode; currentNode = currentNode.getNext()) {
 
-					var a = '';
-				}
-			}
-		}
-	}
+                            if(currentNode.getPrevious() != null && currentNode.getNext() != null) {
+                                var currentToken = currentNode.getValue();
+                                built.insertBefore(selectedToken, currentToken);
+                                selectedToken.Obj().before(currentToken.Obj());
+                            }
+
+                            if(currentNode.getNext() === null) {
+                                selectedToken.select();
+                                selectedToken.Obj().remove();
+                                built.remove(selectedToken);
+                            }
+                        }
+
+                    }
+                    else if(selectedCount === 1 && selected[0].getIsToken()) {
+                        if(f_onError) {
+                            f_onError('More then one token should be selected to make a group');
+                        }
+                    }
+                    else if(selectedCount >= 2) {
+                        var mostLeftSelectedNode = null,
+                        mostRightSelectedNode = null,
+                        group = new LinkedList(),
+                        groupToken = null,
+                        groupText = '',
+                        selectedToken = null;
+
+                        var linkedListToString = function(ll) {
+                            var t = '';
+
+                            for(var currentNode = ll.getHead(); currentNode; currentNode = currentNode.getNext()) {
+                                t += currentNode.getValue().getText();
+                                t += ' ';
+                            }
+
+                            return t;
+                        }
+
+                        for(var currentNode = built.getHead(); currentNode; currentNode = currentNode.getNext()) {
+                            var index = selected.indexOf(currentNode.getValue());
+                            if(index > -1) {
+                                mostLeftSelectedNode = currentNode;
+                                break;
+                            }
+                        }
+
+                        for(var currentNode = mostLeftSelectedNode; currentNode; currentNode = currentNode.getNext()) {
+                            var index = selected.indexOf(currentNode.getValue());
+                            if(index > -1) {
+                                mostRightSelectedNode = currentNode;
+                            }
+                        }
+
+                        var mostLeftSelectedToken = mostLeftSelectedNode.getValue(),
+                        mostRightSelectedToken = mostRightSelectedNode.getValue();
+
+                        if( (mostLeftSelectedToken.getIsToken() === false && mostLeftSelectedToken.getIsGroup() === false) ||
+                        (mostRightSelectedToken.getIsToken() === false && mostRightSelectedToken.getIsGroup() === false) ) {
+                            f_onError('Left and right parts of a group cannot be operators');
+                            return;
+                        }
+
+                        var currentNode = mostLeftSelectedNode,
+                        currentToken = null,
+                        leftParenthesis = createToken('(', '('),
+                        rightParenthesis = createToken(')', ')');
+
+                        group.add(leftParenthesis);
+                        group.add(currentNode.getValue());
+
+                        do {
+                            currentNode = currentNode.getNext();
+                            currentToken = currentNode.getValue();
+
+                            if(!currentToken.getIsSelected()) {
+                                currentToken.select();
+                            }
+
+                            group.add(currentToken);
+                        } while(currentNode != mostRightSelectedNode);
+                        group.add(rightParenthesis);
+
+                        groupText = linkedListToString(group);
+                        groupToken = createToken(group, groupText);
+
+                        selectedCount = selected.length;
+
+                        for(var i = selectedCount - 1; i >= 0; i--) {
+                            selectedToken = selected[i];
+                            selectedToken.select();
+
+                            if(i === 0) {
+                                selectedToken.Obj().before(groupToken.Obj());
+                                built.insertBefore(selectedToken, groupToken);
+                            }
+
+                            selectedToken.Obj().remove();
+                            built.remove(selectedToken);
+
+                            selected.splice(i, 1);
+                        }
+                    }
+
+                },
+
+                removeSelected: function() {
+                    var selectedCount = selected.length;
+
+                    if(selectedCount === 0) {
+                        return;
+                    }
+                    else {
+                        var selectedToken = null;
+
+                        for(var i = selectedCount - 1; i >= 0; i--) {
+                            selectedToken = selected[i];
+                            selectedToken.select();
+
+                            selectedToken.Obj().remove();
+                            built.remove(selectedToken);
+
+                            selected.splice(i, 1);
+                        }
+                    }
+                },
+
+                unselectAll: function() {
+                    var selectedCount = selected.length;
+
+                    if(selectedCount === 0) {
+                        return;
+                    }
+                    else {
+                        for(var i = selectedCount - 1; i >= 0; i--) {
+                            selected[i].select();
+                        }
+                    }
+                },
+
+                clearAll: function() {
+                    for(var currentNode = built.getHead(); currentNode; currentNode = currentNode.getNext()) {
+                        currentNode.getValue().Obj().remove();
+                        built.remove(currentNode.getValue());
+                    }
+                },
+
+                toString: function() {
+                    var t = '';
+
+                    for(var currentNode = built.getHead(); currentNode; currentNode = currentNode.getNext()) {
+                        t += currentNode.getValue().getText();
+                        t += ' ';
+                    }
+
+                    return t;
+                },
+
+                onError: function(callback) {
+                    f_onError = callback;
+                },
+
+                loadExpression: function(expression) {
+                    var tokensToLookFor = [],
+                    operators = ['OR', 'AND'];
+
+                    for(var i = 0; i < data.length; i++) {
+                        tokensToLookFor = tokensToLookFor.concat(data[i].values);
+                    }
+
+                    var a = '';
+                }
+
+            }
+        }
+
+    }
 }( );
