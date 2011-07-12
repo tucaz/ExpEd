@@ -1,9 +1,8 @@
 $(document).ready( function () {
 	module("Editor", {
 		setup: function() {
-			var $controlsContainer = $('#controls'),
-			$expressionContainer = $('#expression'),
-			that = this;
+			var $expressionContainer = $('#expression'),
+				that = this;
 
 			this.data = [{
 				name: 'Roles',
@@ -19,7 +18,7 @@ $(document).ready( function () {
 				values: ['Attr1', 'Attr2']
 			}];
 
-			this.editor = new expEd.Editor($controlsContainer, $expressionContainer, this.data);
+			this.editor = new expEd.Editor($expressionContainer, this.data);
 
 			$('#add-or').click( function(e) {
 				that.editor.addToken('OR')

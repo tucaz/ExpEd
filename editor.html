@@ -22,9 +22,9 @@
 					prefix: 'a=',
 					values: ['Attr1', 'Attr2']
 				}],
-				editor = new expEd.Editor($controlsContainer, $expressionContainer, data);
+				editor = new expEd.Editor($expressionContainer, data);
 
-				editor.createUI();
+				editor.createUI($controlsContainer);
 				editor.onError( function(msg) {
 					alert(msg)
 				});

@@ -70,8 +70,8 @@ var expEd = function() {
 				}
 			}
 		},
-		Editor: function (controlsContainer, expressionContainer, data, options) {
-			var controls = controlsContainer,
+		Editor: function (expressionContainer, data, options) {
+			var controls = null,
 			expression = expressionContainer,
 			built = new LinkedList(),
 			f_onError = null,
@@ -110,9 +110,11 @@ var expEd = function() {
 			}
 			return {
 
-				createUI: function() {
+				createUI: function(controlsContainer) {
 					var that = this,
 					dataCount = data.length;
+					
+					controls = controlsContainer;
 
 					for(var i = 0; i < dataCount; i++) {
 						var $label = $('<label>'),
@@ -265,9 +267,7 @@ var expEd = function() {
 							}
 
 							group.add(currentToken);
-						//TODO: A node should have some unique_id or something like that
-						//but for now checking text will do
-						} while(currentNode.getValue().getText() != mostRightSelectedNode.getValue().getText());
+						} while(currentNode != mostRightSelectedNode);
 						group.add(rightParenthesis);
 
 						groupText = linkedListToString(group);
