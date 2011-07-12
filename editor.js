@@ -94,8 +94,8 @@ var expEd = function() {
             built = new LinkedList(),
             f_onError = null,
             selected = [],
-            blockOperatorSequence = (options && options.blockOperatorSequence != null) ? options.blockOperatorSequence : true,
-            blockTokenSequence = (options && options.blockTokenSequence != null) ? options.blockTokenSequence : true;
+            allowOperatorSequence = (options && options.allowOperatorSequence != null) ? options.allowOperatorSequence : false,
+            allowTokenSequence = (options && options.allowTokenSequence != null) ? options.allowTokenSequence : false;
 
             var createToken = function(tv, tt) {
                 var token = new expEd.Token(tv, tt);
@@ -122,13 +122,15 @@ var expEd = function() {
                 var valid = false;
 
                 if(newToken.getIsOperator()) {
-                    valid = previousToken != null &&
-                    (previousToken.getIsGroup() || previousToken.getIsToken()) &&
-                    (nextToken == null || nextToken.getIsGroup() || nextToken.getIsToken());
+                    valid = allowOperatorSequence ||
+                    (previousToken != null &&
+                        (previousToken.getIsGroup() || previousToken.getIsToken()) &&
+                        (nextToken == null || nextToken.getIsGroup() || nextToken.getIsToken()));
                 }
                 else if(newToken.getIsToken() || newToken.getIsGroup()) {
-                    valid = (previousToken == null || previousToken.getIsOperator()) &&
-                    (nextToken == null || nextToken.getIsOperator());
+                    valid = allowTokenSequence ||
+                    ((previousToken == null || previousToken.getIsOperator()) &&
+                        (nextToken == null || nextToken.getIsOperator()));
                 }
 
                 return valid;
@@ -213,8 +215,8 @@ var expEd = function() {
                     else {
                         for(var i = selectedCount - 1; i >= 0; i--) {
                             var selectedToken = selected[i],
-                                selectedNode = built.find(selectedToken),
-                                nextToken = selectedNode.getNext() != null ? selectedNode.getNext().getValue() : null;    
+                            selectedNode = built.find(selectedToken),
+                            nextToken = selectedNode.getNext() != null ? selectedNode.getNext().getValue() : null;
 
                             if(validateInsert(selectedToken, newToken, nextToken)) {
                                 selectedToken.select();
