@@ -368,4 +368,69 @@ $(document).ready( function () {
         $('#add-or').trigger('click');
     }
 
+    module("Editor loading expressions", {
+        setup: function() {
+            var $expressionContainer = $('#expression'),
+            that = this;
+
+            this.data = [{
+                name: 'Roles',
+                prefix: '{r=',
+                sufix: '}',
+                values: ['RoleA', 'RoleB', 'RoleC']
+            },{
+                name: 'Groups',
+                prefix: '{g=',
+                sufix: '}',
+                values: ['Group1', 'Group2', 'Group3', 'Group4']
+            },{
+                name: 'Attributes',
+                prefix: '{a=',
+                sufix: '}',
+                values: ['Attr1', 'Attr2']
+            }];
+
+            this.editor = new expEd.Editor($expressionContainer, this.data, {
+                allowOperatorSequence: true,
+                allowTokenSequence: true
+            });
+
+
+        },
+
+        tearDown: function() {
+            this.data = null;
+            this.editor = null;
+        }
+
+    });
+    
+    test('Can load a simple value token expression', function () {
+        expect(1);
+
+        this.editor.loadExpression('{r=RoleA}');
+        
+        equal($('.token').length, 1,'expression loaded');
+    });
+    
+    test('Can load a simple boolean expression', function () {
+        expect(1);
+
+        debugger;
+        
+        this.editor.loadExpression('{r=RoleA}|{r=Attr1}');
+        
+        equal($('.token').length, 3,'expression loaded');
+    });
+    
+    test('Can load a big boolean expression', function () {
+        expect(1);
+
+        debugger;
+        
+        this.editor.loadExpression('{r=RoleA}|{r=Attr1}&{g=Group1}|{r=RoleB}');
+        
+        equal($('.token').length, 7,'expression loaded');
+    });
+
 });

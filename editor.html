@@ -28,6 +28,8 @@
                 editor = new expEd.Editor($expressionContainer, data);
 
                 editor.createUI($controlsContainer);
+                
+                editor.loadExpression('{r=RoleA}|{r=Attr1}&{g=Group1}|{r=RoleB}');
 
                 editor.onError( function(msg) {
                     alert(msg)

@@ -409,16 +409,64 @@ var expEd = function() {
 
                 loadExpression: function(expression) {
                     var tokensToLookFor = [],
-                    operators = ['OR', 'AND'];
+                    initialDelimiter = '{',
+                    finalDelimiter = '}',
+                    operators = ['|', '&'];
 
                     for(var i = 0; i < data.length; i++) {
                         tokensToLookFor = tokensToLookFor.concat(data[i].values);
                     }
 
-                    var a = '';
+                    var currentToken = '',
+                    charIndex = 0,
+                    initialIndex = -1,
+                    finalIndex = -1,
+                    charsToParse = expression.length - 1,
+                    stringToParse = expression;
+
+                    while(charsToParse > 0) {
+                        for(charIndex = 0; charIndex < charsToParse; charIndex++) {
+                            if(initialIndex === -1 && stringToParse[charIndex] === initialDelimiter) {
+                                initialIndex = charIndex;
+                                currentToken = currentToken + stringToParse[charIndex];
+                                continue;
+                            }
+
+                            if(initialIndex > -1) {
+                                if(stringToParse[charIndex] === finalDelimiter) {
+                                    finalIndex = charIndex;
+                                    currentToken = currentToken + stringToParse[charIndex];
+                                    break;
+                                }
+                            }
+                            
+                            if(operators.indexOf(stringToParse[charIndex]) > -1){
+                                currentToken = currentToken + stringToParse[charIndex];
+                                break;
+                            }
+
+                            if(stringToParse[charIndex] != initialDelimiter && stringToParse[charIndex] != finalDelimiter) {
+                                currentToken = currentToken + stringToParse[charIndex];
+                            }
+                        }
+
+                        //TODO: Check if the tokens found are valid before adding
+                        // in the tokensToLookFor array
+
+                        if(currentToken != null && currentToken != '') {
+                            this.addToken(currentToken);
+                            currentToken = '';
+                        }
+
+                        initialIndex = -1;
+                        finalIndex = -1;
+                        stringToParse = stringToParse.substring(charIndex + 1);
+                        charsToParse = stringToParse.length;
+                    }
                 }
 
             }
+
         }
 
     }
