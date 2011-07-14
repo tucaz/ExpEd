@@ -223,6 +223,37 @@ $(document).ready( function () {
         equal($('.token').length, 1, 'only 1 token after group is created');
     });
 
+    test('A group token can be made of other group token', function () {
+        expect(3);
+
+        this.editor.onError( function(e) {
+            ok(false, 'error should not be fired: ' + e);
+        })
+
+        this.editor.addToken(this.data[0].values[0]);
+        addAndOp();
+        this.editor.addToken(this.data[0].values[0]);
+
+        equal($('.token').length, 3, '3 tokens exist before group is created');
+
+        selectToken(1);
+        selectToken(3);
+
+        this.editor.groupSelected();
+
+        equal($('.token').length, 1, 'only 1 token after group is created');
+
+        addAndOp();
+        this.editor.addToken(this.data[0].values[0]);
+
+        selectToken(1);
+        selectToken(3);
+        
+        this.editor.groupSelected();
+        
+        equal($('.token').length, 1, 'only 1 token after group is created');
+    });
+
     module("Editor allowing operator and token sequences", {
         setup: function() {
             var $expressionContainer = $('#expression'),
@@ -404,33 +435,78 @@ $(document).ready( function () {
         }
 
     });
-    
+
     test('Can load a simple value token expression', function () {
         expect(1);
 
         this.editor.loadExpression('{r=RoleA}');
-        
+
         equal($('.token').length, 1,'expression loaded');
     });
-    
+
     test('Can load a simple boolean expression', function () {
         expect(1);
 
-        debugger;
-        
-        this.editor.loadExpression('{r=RoleA}|{r=Attr1}');
-        
+        this.editor.loadExpression('{r=RoleA}|{r=Attr1}', ['|']);
+
         equal($('.token').length, 3,'expression loaded');
     });
-    
+
     test('Can load a big boolean expression', function () {
         expect(1);
 
-        debugger;
-        
-        this.editor.loadExpression('{r=RoleA}|{r=Attr1}&{g=Group1}|{r=RoleB}');
-        
+        this.editor.loadExpression('{r=RoleA}|{r=Attr1}&{g=Group1}|{r=RoleB}', ['|','&']);
+
         equal($('.token').length, 7,'expression loaded');
     });
+
+    test('Can load a big boolean expression with multi-char operators', function () {
+        expect(1);
+
+        this.editor.loadExpression('{r=RoleA}OR{r=Attr1}AND{g=Group1}OR{r=RoleB}', ['AND','OR']);
+
+        equal($('.token').length, 7,'expression loaded');
+    });
+    
+    test('Can load a simple group expression that begins with the group', function () {
+        expect(1);
+
+        this.editor.loadExpression('({r=RoleA}OR{r=Attr1})', ['OR']);
+
+        equal($('.token').length, 1,'expression loaded');
+    });
+    
+    test('Can load a simple group and value expression that begins with the group', function () {
+        expect(1);
+
+        this.editor.loadExpression('({r=RoleA}OR{r=Attr1})AND{r=RoleB}', ['OR','AND']);
+
+        equal($('.token').length, 3,'expression loaded');
+    });
+    
+    test('Can load a simple group and value expression that begins with the value expression', function () {
+        expect(1);
+
+        this.editor.loadExpression('{r=RoleB}AND({r=RoleA}OR{r=Attr1})', ['OR','AND']);
+
+        equal($('.token').length, 3,'expression loaded');
+    });
+    
+    test('Can load a group expression with two groups not nested', function () {
+        expect(1);
+
+        this.editor.loadExpression('({r=RoleA}OR{r=Attr1})AND({r=RoleA}OR{r=Attr1})', ['OR','AND']);
+
+        equal($('.token').length, 3,'expression loaded');
+    });
+    
+    // test('Can load a group expression nested groups', function () {
+        // expect(1);
+// 
+        // this.editor.onError(function(e){alert(e)});
+        // this.editor.loadExpression('(({a=Attr1}OR{g=Group1})AND{a=Attr1})', ['OR','AND']);
+//         
+        // equal($('.token').length, 3,'expression loaded');
+    // });
 
 });

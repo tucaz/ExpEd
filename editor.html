@@ -27,9 +27,14 @@
                 }],
                 editor = new expEd.Editor($expressionContainer, data);
 
-                editor.createUI($controlsContainer);
+                editor.createUI($controlsContainer);                
                 
-                editor.loadExpression('{r=RoleA}|{r=Attr1}&{g=Group1}|{r=RoleB}');
+                // editor.loadExpression('({r=RoleA}OR{r=Attr1})', ['OR']);
+                // editor.loadExpression('({r=RoleA}OR{r=Attr1})AND{r=RoleB}', ['OR','AND']);
+                // editor.loadExpression('{r=RoleA}OR{r=Attr1}AND{g=Group1}OR{r=RoleB}', ['AND','OR']);
+                // editor.loadExpression('{r=RoleB}AND({r=RoleA}OR{r=Attr1})', ['OR','AND']);
+                // editor.loadExpression('({r=RoleA}OR{r=Attr1})AND({r=RoleA}OR{r=Attr1})', ['OR','AND']);
+                editor.loadExpression('(({a=Attr1}OR{g=Group1})AND{a=Attr1})', ['OR','AND']);
 
                 editor.onError( function(msg) {
                     alert(msg)

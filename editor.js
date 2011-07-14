@@ -42,7 +42,7 @@ var expEd = function() {
                 },
 
                 getIsOperator: function() {
-                    return v === '|' || v === '&';
+                    return v === '|' || v === '&' || v === 'OR' || v === 'AND';
                 },
 
                 getText: function() {
@@ -96,6 +96,17 @@ var expEd = function() {
             selected = [],
             allowOperatorSequence = (options && options.allowOperatorSequence != null) ? options.allowOperatorSequence : false,
             allowTokenSequence = (options && options.allowTokenSequence != null) ? options.allowTokenSequence : false;
+
+            var linkedListToString = function(ll) {
+                var t = '';
+
+                for(var currentNode = ll.getHead(); currentNode; currentNode = currentNode.getNext()) {
+                    t += currentNode.getValue().getText();
+                    t += ' ';
+                }
+
+                return t;
+            }
 
             var createToken = function(tv, tt) {
                 var token = new expEd.Token(tv, tt);
@@ -232,6 +243,8 @@ var expEd = function() {
                             }
                         }
                     }
+
+                    return newToken;
                 },
 
                 groupSelected: function() {
@@ -272,17 +285,6 @@ var expEd = function() {
                         groupToken = null,
                         groupText = '',
                         selectedToken = null;
-
-                        var linkedListToString = function(ll) {
-                            var t = '';
-
-                            for(var currentNode = ll.getHead(); currentNode; currentNode = currentNode.getNext()) {
-                                t += currentNode.getValue().getText();
-                                t += ' ';
-                            }
-
-                            return t;
-                        }
 
                         for(var currentNode = built.getHead(); currentNode; currentNode = currentNode.getNext()) {
                             var index = selected.indexOf(currentNode.getValue());
@@ -407,61 +409,166 @@ var expEd = function() {
                     f_onError = callback;
                 },
 
-                loadExpression: function(expression) {
-                    var tokensToLookFor = [],
+                loadExpression: function(expression, allowedOperators) {
+                    var that = this,
                     initialDelimiter = '{',
                     finalDelimiter = '}',
-                    operators = ['|', '&'];
+                    groupInitialDelimiter = '(',
+                    groupFinalDelimiter = ')',
+                    operators = allowedOperators || [];
 
-                    for(var i = 0; i < data.length; i++) {
-                        tokensToLookFor = tokensToLookFor.concat(data[i].values);
-                    }
+                    expression = expression.trim();
 
-                    var currentToken = '',
-                    charIndex = 0,
-                    initialIndex = -1,
-                    finalIndex = -1,
-                    charsToParse = expression.length - 1,
-                    stringToParse = expression;
+                    var parseValueExpression = function(s) {
+                        var currentToken = '',
+                        currentOp = '',
+                        charIndex = 0,
+                        initialIndex = -1,
+                        finalIndex = -1,
+                        charsToParse = s.length - 1,
+                        stringToParse = s,
+                        result = new LinkedList(),
+                        parsedChars = 0,
+                        groupFound = false;
 
-                    while(charsToParse > 0) {
-                        for(charIndex = 0; charIndex < charsToParse; charIndex++) {
-                            if(initialIndex === -1 && stringToParse[charIndex] === initialDelimiter) {
-                                initialIndex = charIndex;
-                                currentToken = currentToken + stringToParse[charIndex];
-                                continue;
-                            }
-
-                            if(initialIndex > -1) {
-                                if(stringToParse[charIndex] === finalDelimiter) {
-                                    finalIndex = charIndex;
-                                    currentToken = currentToken + stringToParse[charIndex];
+                        while(charsToParse > 0 && !groupFound) {
+                            for(charIndex = 0; charIndex <= charsToParse; charIndex++) {
+                                if(stringToParse[charIndex] === groupInitialDelimiter){
+                                    groupFound = true;
+                                    //Back to previous character so the outer function won't miss it
+                                    charIndex = charIndex - 2;
                                     break;
                                 }
+                                
+                                if(initialIndex === -1 && stringToParse[charIndex] === initialDelimiter) {
+                                    initialIndex = charIndex;
+                                    currentToken = currentToken + stringToParse[charIndex];
+                                    continue;
+                                }
+
+                                if(initialIndex > -1 && finalIndex === -1) {
+                                    if(stringToParse[charIndex] != initialDelimiter && stringToParse[charIndex] != finalDelimiter) {
+                                        currentToken = currentToken + stringToParse[charIndex];
+                                        continue;
+                                    }
+
+                                    if(stringToParse[charIndex] === finalDelimiter) {
+                                        finalIndex = charIndex;
+                                        currentToken = currentToken + stringToParse[charIndex];
+                                        break;
+                                    }
+                                }
+
+                                if(initialIndex === -1 && finalIndex === -1) {
+                                    currentOp = currentOp + stringToParse[charIndex];
+                                    continue;
+                                }
                             }
-                            
-                            if(operators.indexOf(stringToParse[charIndex]) > -1){
-                                currentToken = currentToken + stringToParse[charIndex];
+
+                            //TODO: Check if the tokens found are valid before
+                            // adding
+                            // in the tokensToLookFor array
+                            if(currentOp != null && currentOp != '') {
+                                result.add(currentOp);
+                                currentOp = '';
+                            }
+
+                            if(currentToken != null && currentToken != '') {
+                                result.add(currentToken);
+                                currentToken = '';
+                            }
+
+                            initialIndex = -1;
+                            finalIndex = -1;
+                            stringToParse = stringToParse.substring(charIndex + 1);
+                            charsToParse = stringToParse.length;
+                            parsedChars = parsedChars + (charIndex + 1);
+                        }
+
+                        return {
+                            CharIndex: parsedChars,
+                            Result: result
+                        };
+                    }
+
+                    var parseGroupExpression = function(s) {
+
+                        var charIndex = 0,
+                        initialIndex = -1,
+                        finalIndex = -1,
+                        charsToParse = s.length - 1,
+                        stringToParse = s;
+
+                        while(charsToParse > 0) {
+                            for(charIndex = 0; charIndex <= charsToParse; charIndex++) {                                
+                                if(initialIndex === -1 && stringToParse[charIndex] === groupInitialDelimiter) {
+                                    initialIndex = charIndex;
+                                    continue;
+                                }
+
+                                if(initialIndex > -1 && finalIndex === -1 && stringToParse[charIndex] === groupFinalDelimiter) {
+                                    finalIndex = charIndex;
+
+                                    var valueExpressionToParse = stringToParse.substring(initialIndex + 1, finalIndex - initialIndex);
+                                    var parsedValue = parseValueExpression(valueExpressionToParse).Result;
+                                    var allTokenAdded = [];
+
+                                    for(var currentNode = parsedValue.getHead(); currentNode; currentNode = currentNode.getNext()) {
+                                        var tokenAdded = that.addToken(currentNode.getValue());
+                                        allTokenAdded.push(tokenAdded);
+                                    }
+
+                                    return {
+                                        CharIndex: charIndex,
+                                        Result: allTokenAdded
+                                    };
+                                }
+                            }
+
+                            initialIndex = -1;
+                            finalIndex = -1;
+                            stringToParse = stringToParse.substring(charIndex + 1);
+                            charsToParse = stringToParse.length;
+                        }
+                    }
+                    
+                    debugger;
+                    
+                    var _charIndex = 0,
+                    _charsToParse = expression.length - 1,
+                    _stringToParse = expression,
+                    result = new LinkedList();
+                    
+                    while(_charsToParse > 0) {
+                        for(_charIndex = 0; _charIndex <= _charsToParse; _charIndex++) {
+                            if(_stringToParse[_charIndex] === groupInitialDelimiter) {
+                                var r = parseGroupExpression(_stringToParse);
+                                var groupTokens = r.Result;
+
+                                for(var i = 0; i < groupTokens.length; i++) {
+                                    groupTokens[i].select();
+                                }
+
+                                this.groupSelected();
+
+                                _stringToParse = _stringToParse.substring(r.CharIndex + 1);
+                                
                                 break;
                             }
+                            else {
+                                var r = parseValueExpression(_stringToParse);
+                                var valueExpression = r.Result;
 
-                            if(stringToParse[charIndex] != initialDelimiter && stringToParse[charIndex] != finalDelimiter) {
-                                currentToken = currentToken + stringToParse[charIndex];
+                                for(var currentNode = valueExpression.getHead(); currentNode; currentNode = currentNode.getNext()) {
+                                    this.addToken(currentNode.getValue());
+                                }
+                                
+                                _stringToParse = _stringToParse.substring(r.CharIndex + 1);
+                                break;
                             }
                         }
 
-                        //TODO: Check if the tokens found are valid before adding
-                        // in the tokensToLookFor array
-
-                        if(currentToken != null && currentToken != '') {
-                            this.addToken(currentToken);
-                            currentToken = '';
-                        }
-
-                        initialIndex = -1;
-                        finalIndex = -1;
-                        stringToParse = stringToParse.substring(charIndex + 1);
-                        charsToParse = stringToParse.length;
+                        _charsToParse = _stringToParse.length;
                     }
                 }
 
@@ -470,4 +577,4 @@ var expEd = function() {
         }
 
     }
-}( );
+}( );;
