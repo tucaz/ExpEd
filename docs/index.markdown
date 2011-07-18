@@ -14,7 +14,9 @@ The purpose of this small library is to allow business users or any other laypeo
 
 ##Simplest usage
 
-The simplest way to start using ExpEd is simply add a reference to it, create the editor object and pass the data and operators that you want to allow in the expression: 
+The simplest way to start using ExpEd is simply add a reference to it, create the editor object and pass the data and operators that you want to allow in the expression 
+
+    App.js
 
     $(function(){
         var editor = new expEd.Editor({
@@ -29,7 +31,9 @@ The simplest way to start using ExpEd is simply add a reference to it, create th
         editor.createUI($('#controls'));
     })
 
-With this HTML:
+With this HTML
+
+    editor.html
 
     <!DOCTYPE html>
     <html>
@@ -47,3 +51,75 @@ With this HTML:
         </div>
     </body>
     </html>
+
+##Custom Mode
+
+If you want to use it without the default token/operator/buttons selection (which sucks actually - help wanted!) you can customize every option and call editor's method with you own buttons
+
+    var editor = new expEd.Editor({
+        expressionContainer: $('#expression'),
+        operators: ['+','-','/','%','*']
+    });
+
+    editor.onError( function(msg) {
+        alert(msg)
+    });
+
+    $('#add-token').click( function(e) {
+        $('#values option:selected').each( function() {
+            editor.addToken($(this).val());
+        });
+
+    });
+
+    $('#add-op').click( function(e) {
+        $('#op option:selected').each( function() {
+            editor.addToken($(this).val());
+        });
+
+    });
+    
+    $('#show').click( function(e) {
+        alert(editor.toString());
+    });
+
+    $('#group').click( function(e) {
+        editor.groupSelected();
+    });
+    
+    $('#remove').click( function(e) {
+        editor.removeSelected();
+    });
+
+HTML
+
+    <div id="controls">
+        <select id="values">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+        <input type="button" id="add-token" value="Add Selected Number" />
+        <br>
+        <select id="op">
+            <option value="+">+</option>
+            <option value="/">/</option>
+            <option value="-">-</option>
+            <option value="*">*</option>
+            <option value="%">%</option>
+        </select>
+        <input type="button" id="add-op" value="Add Selected Operator" />
+    </div>        
+    <div id="expression">            
+    </div>
+    <div id="buttons">                        
+        <input type="button" id="group" value="Group/Ungroup selected" />
+        <input type="button" id="remove" value="Remove selected" />
+        <input type="button" id="show" value="Alert Expression" />
+    </div>        
+
+##API Documentation
+
+Below is a table with complete description of every option avaiable. Drop me a message if you need any help to understand it. 
