@@ -3,16 +3,26 @@ layout: default
 title: ExpEd Documentation @ GitHub
 ---
 
-##Purpose
+##Index
+
+1. [Purpose](#1)
+2. [Dependencies](#2)
+3. [Usage](#3)
+4. [Custom Usage](#4)
+5. [API Documentation] (#5)
+6. [Sample Code] (#6)
+
+
+##Purpose <span id="1"></span>
 
 The purpose of this small library is to allow business users or any other laypeople to write complex expressions in an easy way. Example: boolean expressions, math expressions, etc.
 
-##Dependencies
+##Dependencies <span id="2"></span>
 
 * [jQuery 1.3.2 or higher](http://docs.jquery.com/Downloading_jQuery)
 * [LinkedList](https://github.com/tucaz/LinkedList)
 
-##Simplest usage
+##Simplest usage <span id="3"></span>
 
 The simplest way to start using ExpEd is simply add a reference to it, create the editor object and pass the data and operators that you want to allow in the expression 
 
@@ -52,7 +62,7 @@ With this HTML
     </body>
     </html>
 
-##Custom Mode
+##Custom Mode <span id="4"></span>
 
 If you want to use it without the default token/operator/buttons selection (which sucks actually - help wanted!) you can customize every option and call editor's method with you own buttons
 
@@ -120,7 +130,7 @@ HTML
         <input type="button" id="show" value="Alert Expression" />
     </div>        
 
-##API Documentation
+##API Documentation <span id="5"></span>
 
 Below is a complete description of every option, event and method avaiable. Drop me a message if you need any help to understand it. 
 
@@ -162,3 +172,8 @@ unselectAll| |Unselect all selected tokens|
 clearAll| |Remove all exsting tokens from the expression being built|
 toString| |Returns a string containing the built expression|
 loadExpression|**expression**: string with the expression to be loaded **allowedOperators**: array with strings identifying each operator in the expression|Loads a given expression. This is the inverse path of building a new expression. Used to edit existing expressions. Currently works with all expression except the ones containing nested groups (already in TODO List)|
+
+##Sample Code <span id="6"></span>
+
+* [Sample 1]({{site.url}}demo/index.html)
+* [Sample 2]({{site.url}}demo2/index.html)
