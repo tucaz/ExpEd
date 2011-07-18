@@ -14,7 +14,7 @@ The purpose of this small library is to allow business users or any other laypeo
 
 ##Simplest usage
 
-The simplest way to start using ExpEd is simply add a reference to it, create and editor object and pass the data and operators that you want to be allowed in the expression. 
+The simplest way to start using ExpEd is simply add a reference to it, create the editor object and pass the data and operators that you want to allow in the expression: 
 
     $(function(){
         var editor = new expEd.Editor({
@@ -23,7 +23,7 @@ The simplest way to start using ExpEd is simply add a reference to it, create an
                     name: 'Values',
                     values: ['1', '2', '3','4', '5', '6','7', '8', '9','0']
                 }], 
-                operators: ['OR','AND']
+                operators: ['+','-','/','*']
             });
     
         editor.createUI($('#controls'));
