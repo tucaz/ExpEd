@@ -3,7 +3,7 @@ layout: default
 title: ExpEd Documentation @ GitHub
 ---
 
-#Purpose
+##Purpose
 
 The purpose of this small library is to allow business users or any other laypeople to write complex expressions in an easy way. Example: boolean expressions, math expressions, etc.
 
