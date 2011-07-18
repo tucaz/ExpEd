@@ -126,48 +126,19 @@ Below is a complete description of every option, event and method avaiable. Drop
 
 ###Options
 
-<table>
-    <tr>
-        <th>Option</th>
-        <th>Description</th>
-    </tr>
-    <tr>
-        <td>tokens</td>
-        <td>Array of tokens that ExpEd should use when you tell it to build the UI for you</td>
-
-    </tr>
-    <tr>
-        <td>operators</td>
-        <td>Array of strings the ExpEd should treat as operator tokens</td>
-    </tr>
-    <tr>
-        <td>expressionContainer</td>
-
-        <td>A div that will be used by ExpEd to create and show the expression being desined</td>
-    </tr>
-    <tr>
-        <td>allowOperatorSequence</td>
-        <td>Boolean value indicating wheter two operators or more can be used sequentially in an expression. Default value is *false*</td>
-    </tr>
-    <tr>
-        <td>allowTokenSequence</td>
-        <td>Boolean value indicating wheter two value tokens or more can be used sequentially in an expression. Default value is *false*</td>
-    </tr>
-</table>
+Option | Description |
+:------------|:------------|
+tokens | Array of tokens that ExpEd should use when you tell it to build the UI for you |
+operators | Array of strings the ExpEd should treat as operator tokens |
+expressionContainer | A div that will be used by ExpEd to create and show the expression being desined |
+allowOperatorSequence | Boolean value indicating wheter two operators or more can be used sequentially in an expression. Default value is **false** |
+allowTokenSequence | Boolean value indicating wheter two value tokens or more can be used sequentially in an expression. Default value is **false** |
 
 ###Events
 
-<table>
-    <tr>
-        <th>Event</th>
-        <th>Description</th>
-    </tr>
-    <tr>
-        <td>onError</td>
-        <td>Event called when some unauthorized operation is executed in the Editor. The callback method should expect a parameter with the error message.</td>
-    </tr>
-</table>
-
+Event | Description |
+:------------|:------------|
+onError | Event called when some unauthorized operation is executed in the Editor. The callback method should expect a parameter with the error message |
 
 #### Unauthorized operations include: 
 
@@ -179,3 +150,15 @@ Below is a complete description of every option, event and method avaiable. Drop
 
 ###Methods
 
+Method | Parameters | Description |
+:-----------|:-----------|:------------|
+getControlPrefix| |Returns the string that the Editor uses to prefix IDs when creating controls with createUI method|
+createUI|**controlsContainer**: html container where controls will be placed in|Based on information received by the constructor, create all controls needed to perform UI operations with the Editor: add token/operator, remove selected, unselect all, clear all, group/ungroup selected|
+getLength| |Returns an int with the length of the expression being built|
+addToken|**t**: Value of the token or operator to be added|Adds a token to the expression. Should be used when adding value tokens or operators|
+groupSelected| |Take all selected tokens and turn them into a group|
+removeSelected| |Remove all selected tokens from the expression|
+unselectAll| |Unselect all selected tokens|
+clearAll| |Remove all exsting tokens from the expression being built|
+toString| |Returns a string containing the built expression|
+loadExpression|**expression**: string with the expression to be loaded **allowedOperators**: array with strings identifying each operator in the expression|Loads a given expression. This is the inverse path of building a new expression. Used to edit existing expressions. Currently works with all expression except the ones containing nested groups (already in TODO List)|

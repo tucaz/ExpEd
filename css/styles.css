@@ -6,7 +6,7 @@ body {
 }
 #container {
     margin: 0 auto;
-    width: 700px;
+    width: 850px;
 }
 h1 {
     font-size: 3.8em;
@@ -29,6 +29,16 @@ h3 {
 }
 a {
     color: #bc9667;
+}
+
+table {
+    border-spacing: 2px;
+    background-color: #000000;
+}
+
+td {
+    padding: 5px;
+    background-color: #436998;
 }
 .description {
     font-size: 1.2em;
