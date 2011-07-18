@@ -7,7 +7,8 @@ var expEd = function() {
             t = text,
             f_onSelect = null,
             f_onDeselect = null,
-            $obj = $('<div>');
+            $obj = $('<div>'),
+            that = this;
 
             return {
                 onSelect: function(callback) {
@@ -42,7 +43,7 @@ var expEd = function() {
                 },
 
                 getIsOperator: function() {
-                    return v === '|' || v === '&' || v === 'OR' || v === 'AND';
+                    return that.operatorList ? that.operatorList.indexOf(v) > -1 : false;
                 },
 
                 getText: function() {
@@ -88,14 +89,19 @@ var expEd = function() {
             }
         },
 
-        Editor: function (expressionContainer, data, options) {
+        Editor: function (opts) {
             var controls = null,
-            expression = expressionContainer,
             built = new LinkedList(),
             f_onError = null,
             selected = [],
-            allowOperatorSequence = (options && options.allowOperatorSequence != null) ? options.allowOperatorSequence : false,
-            allowTokenSequence = (options && options.allowTokenSequence != null) ? options.allowTokenSequence : false;
+            controlPrefix = 'expEd',
+            data = (opts && opts.tokens != null) ? opts.tokens : [],
+            operators = (opts && opts.operators != null) ? opts.operators : [],
+            expression = (opts && opts.expressionContainer != null) ? opts.expressionContainer : null,
+            allowOperatorSequence = (opts && opts.allowOperatorSequence != null) ? opts.allowOperatorSequence : false,
+            allowTokenSequence = (opts && opts.allowTokenSequence != null) ? opts.allowTokenSequence : false;
+            
+            expEd.Token.prototype.operatorList = (opts && opts.operators != null) ? opts.operators : [];
 
             var linkedListToString = function(ll) {
                 var t = '';
@@ -148,6 +154,9 @@ var expEd = function() {
             }
 
             return {
+                getControlPrefix: function() {
+                    return controlPrefix;
+                },
 
                 createUI: function(controlsContainer) {
                     var that = this,
@@ -198,6 +207,64 @@ var expEd = function() {
                         controls.append($addButton);
                         controls.append($br);
                     }
+
+                    //adding buttons to handle operators
+                    var opCount = operators.length;
+
+                    for(var i = 0; i < opCount; i++) {
+                        var $addOp = $('<input type="button">');
+
+                        $addOp.attr('id', controlPrefix + '-add-op-' + i);
+                        $addOp.val('Add ' + operators[i]);
+                        $addOp.click( function(index) {
+                            return function() {
+                                that.addToken(operators[index]);
+                            }
+
+                        }(i));
+
+                        controls.append($addOp);
+                    }
+
+                    //adding group selected button
+                    var $group = $('<input type="button">');
+                    $group.attr('id', controlPrefix + '-group');
+                    $group.val('Group/Ungroup selected');
+                    $group.click( function(e) {
+                        that.groupSelected();
+                    });
+
+                    controls.append($group);
+
+                    //adding unselect all button
+                    var $unselectAll = $('<input type="button">');
+                    $unselectAll.attr('id', controlPrefix + '-unselect-all');
+                    $unselectAll.val('Unselect All');
+                    $unselectAll.click( function(e) {
+                        that.unselectAll();
+                    });
+
+                    controls.append($unselectAll);
+
+                    //adding remove selected button
+                    var $remove = $('<input type="button">');
+                    $remove.attr('id', controlPrefix + '-remove');
+                    $remove.val('Remove Selected');
+                    $remove.click( function(e) {
+                        that.removeSelected();
+                    });
+
+                    controls.append($remove);
+
+                    //adding clear selected selected button
+                    var $clearAll = $('<input type="button">');
+                    $clearAll.attr('id', controlPrefix + '-clear-all');
+                    $clearAll.val('Clear All');
+                    $clearAll.click( function(e) {
+                        that.clearAll();
+                    });
+
+                    controls.append($clearAll);
                 },
 
                 getLength: function() {
@@ -433,13 +500,14 @@ var expEd = function() {
 
                         while(charsToParse > 0 && !groupFound) {
                             for(charIndex = 0; charIndex <= charsToParse; charIndex++) {
-                                if(stringToParse[charIndex] === groupInitialDelimiter){
+                                if(stringToParse[charIndex] === groupInitialDelimiter) {
                                     groupFound = true;
-                                    //Back to previous character so the outer function won't miss it
+                                    //Back to previous character so the outer
+                                    // function won't miss it
                                     charIndex = charIndex - 2;
                                     break;
                                 }
-                                
+
                                 if(initialIndex === -1 && stringToParse[charIndex] === initialDelimiter) {
                                     initialIndex = charIndex;
                                     currentToken = currentToken + stringToParse[charIndex];
@@ -500,7 +568,7 @@ var expEd = function() {
                         stringToParse = s;
 
                         while(charsToParse > 0) {
-                            for(charIndex = 0; charIndex <= charsToParse; charIndex++) {                                
+                            for(charIndex = 0; charIndex <= charsToParse; charIndex++) {
                                 if(initialIndex === -1 && stringToParse[charIndex] === groupInitialDelimiter) {
                                     initialIndex = charIndex;
                                     continue;
@@ -531,14 +599,12 @@ var expEd = function() {
                             charsToParse = stringToParse.length;
                         }
                     }
-                    
-                    debugger;
-                    
+
                     var _charIndex = 0,
                     _charsToParse = expression.length - 1,
                     _stringToParse = expression,
                     result = new LinkedList();
-                    
+
                     while(_charsToParse > 0) {
                         for(_charIndex = 0; _charIndex <= _charsToParse; _charIndex++) {
                             if(_stringToParse[_charIndex] === groupInitialDelimiter) {
@@ -552,7 +618,7 @@ var expEd = function() {
                                 this.groupSelected();
 
                                 _stringToParse = _stringToParse.substring(r.CharIndex + 1);
-                                
+
                                 break;
                             }
                             else {
@@ -562,7 +628,7 @@ var expEd = function() {
                                 for(var currentNode = valueExpression.getHead(); currentNode; currentNode = currentNode.getNext()) {
                                     this.addToken(currentNode.getValue());
                                 }
-                                
+
                                 _stringToParse = _stringToParse.substring(r.CharIndex + 1);
                                 break;
                             }

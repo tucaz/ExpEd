@@ -1,8 +1,30 @@
 $(document).ready( function () {
+    module("Editor UI")
+    test('Can create the UI with all buttons and tokens available', function () {
+        expect(6);
+
+        var editor = new expEd.Editor({
+            expressionContainer: $('#expression'),
+            tokens: [{
+                name: 'Values',
+                values: ['1', '2', '3','4', '5', '6','7', '8', '9','0']
+            }],
+            operators: ['OR','AND']
+        });
+
+        editor.createUI($('#controls'));
+
+        equal($('#' + editor.getControlPrefix() + '-add-op-0').length, 1, 'Add operator button found');
+        equal($('#' + editor.getControlPrefix() + '-add-op-1').length, 1, 'Add operator button found');
+        equal($('#' + editor.getControlPrefix() + '-group').length, 1, 'Group/Ungroup button found');
+        equal($('#' + editor.getControlPrefix() + '-unselect-all').length, 1, 'Unselect all button found');
+        equal($('#' + editor.getControlPrefix() + '-remove').length, 1, 'Remove selected button found');
+        equal($('#' + editor.getControlPrefix() + '-clear-all').length, 1, 'Clear all selected button found');
+    });
+
     module("Editor blocking operator and token sequences", {
         setup: function() {
-            var $expressionContainer = $('#expression'),
-            that = this;
+            var that = this;
 
             this.data = [{
                 name: 'Roles',
@@ -21,14 +43,18 @@ $(document).ready( function () {
                 values: ['Attr1', 'Attr2']
             }];
 
-            this.editor = new expEd.Editor($expressionContainer, this.data);
+            this.editor = new expEd.Editor({
+                expressionContainer: $('#expression'),
+                tokens: this.data,
+                operators: ['OR', 'AND']
+            });
 
             $('#add-or').click( function(e) {
-                that.editor.addToken('|')
+                that.editor.addToken('OR')
             });
 
             $('#add-and').click( function(e) {
-                that.editor.addToken('&')
+                that.editor.addToken('AND')
             });
 
             $('#group').click( function(e) {
@@ -248,9 +274,9 @@ $(document).ready( function () {
 
         selectToken(1);
         selectToken(3);
-        
+
         this.editor.groupSelected();
-        
+
         equal($('.token').length, 1, 'only 1 token after group is created');
     });
 
@@ -276,7 +302,10 @@ $(document).ready( function () {
                 values: ['Attr1', 'Attr2']
             }];
 
-            this.editor = new expEd.Editor($expressionContainer, this.data, {
+            this.editor = new expEd.Editor({
+                expressionContainer: $('#expression'),
+                tokens: this.data,
+                operators: ['OR', 'AND'],
                 allowOperatorSequence: true,
                 allowTokenSequence: true
             });
@@ -421,12 +450,11 @@ $(document).ready( function () {
                 values: ['Attr1', 'Attr2']
             }];
 
-            this.editor = new expEd.Editor($expressionContainer, this.data, {
-                allowOperatorSequence: true,
-                allowTokenSequence: true
+            this.editor = new expEd.Editor({
+                expressionContainer: $('#expression'),
+                tokens: this.data,
+                operators: ['OR', 'AND']
             });
-
-
         },
 
         tearDown: function() {
@@ -447,7 +475,7 @@ $(document).ready( function () {
     test('Can load a simple boolean expression', function () {
         expect(1);
 
-        this.editor.loadExpression('{r=RoleA}|{r=Attr1}', ['|']);
+        this.editor.loadExpression('{r=RoleA}OR{r=Attr1}', ['OR']);
 
         equal($('.token').length, 3,'expression loaded');
     });
@@ -455,7 +483,7 @@ $(document).ready( function () {
     test('Can load a big boolean expression', function () {
         expect(1);
 
-        this.editor.loadExpression('{r=RoleA}|{r=Attr1}&{g=Group1}|{r=RoleB}', ['|','&']);
+        this.editor.loadExpression('{r=RoleA}OR{r=Attr1}AND{g=Group1}OR{r=RoleB}', ['OR','AND']);
 
         equal($('.token').length, 7,'expression loaded');
     });
@@ -467,7 +495,7 @@ $(document).ready( function () {
 
         equal($('.token').length, 7,'expression loaded');
     });
-    
+
     test('Can load a simple group expression that begins with the group', function () {
         expect(1);
 
@@ -475,7 +503,7 @@ $(document).ready( function () {
 
         equal($('.token').length, 1,'expression loaded');
     });
-    
+
     test('Can load a simple group and value expression that begins with the group', function () {
         expect(1);
 
@@ -483,7 +511,7 @@ $(document).ready( function () {
 
         equal($('.token').length, 3,'expression loaded');
     });
-    
+
     test('Can load a simple group and value expression that begins with the value expression', function () {
         expect(1);
 
@@ -491,7 +519,7 @@ $(document).ready( function () {
 
         equal($('.token').length, 3,'expression loaded');
     });
-    
+
     test('Can load a group expression with two groups not nested', function () {
         expect(1);
 
@@ -499,14 +527,14 @@ $(document).ready( function () {
 
         equal($('.token').length, 3,'expression loaded');
     });
-    
-    // test('Can load a group expression nested groups', function () {
-        // expect(1);
-// 
-        // this.editor.onError(function(e){alert(e)});
-        // this.editor.loadExpression('(({a=Attr1}OR{g=Group1})AND{a=Attr1})', ['OR','AND']);
-//         
-        // equal($('.token').length, 3,'expression loaded');
-    // });
 
+    // test('Can load a group expression nested groups', function () {
+    // expect(1);
+    //
+    // this.editor.onError(function(e){alert(e)});
+    // this.editor.loadExpression('(({a=Attr1}OR{g=Group1})AND{a=Attr1})',
+    // ['OR','AND']);
+    //
+    // equal($('.token').length, 3,'expression loaded');
+    // });
 });
