@@ -122,4 +122,60 @@ HTML
 
 ##API Documentation
 
-Below is a table with complete description of every option avaiable. Drop me a message if you need any help to understand it. 
+Below is a complete description of every option, event and method avaiable. Drop me a message if you need any help to understand it. 
+
+###Options
+
+<table>
+    <tr>
+        <th>Option</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td>tokens</td>
+        <td>Array of tokens that ExpEd should use when you tell it to build the UI for you</td>
+
+    </tr>
+    <tr>
+        <td>operators</td>
+        <td>Array of strings the ExpEd should treat as operator tokens</td>
+    </tr>
+    <tr>
+        <td>expressionContainer</td>
+
+        <td>A div that will be used by ExpEd to create and show the expression being desined</td>
+    </tr>
+    <tr>
+        <td>allowOperatorSequence</td>
+        <td>Boolean value indicating wheter two operators or more can be used sequentially in an expression. Default value is *false*</td>
+    </tr>
+    <tr>
+        <td>allowTokenSequence</td>
+        <td>Boolean value indicating wheter two value tokens or more can be used sequentially in an expression. Default value is *false*</td>
+    </tr>
+</table>
+
+###Events
+
+<table>
+    <tr>
+        <th>Event</th>
+        <th>Description</th>
+    </tr>
+    <tr>
+        <td>onError</td>
+        <td>Event called when some unauthorized operation is executed in the Editor. The callback method should expect a parameter with the error message.</td>
+    </tr>
+</table>
+
+
+#### Unauthorized operations include: 
+
+* Adding two operators in a sequence when allowOperatorSequence is set to false
+* Start an expression with an operator when allowOperatorSequence is set to false
+* Adding two value tokens in a sequence when allowTokenSequence is set to false
+* Selecting just one token when creating a group
+* Selecting operators as left or right parts of a group
+
+###Methods
+
