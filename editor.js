@@ -150,7 +150,18 @@ var expEd = function() {
                 }
 
                 return valid;
-            }
+            };
+            
+            var raiseError = function(errorMessage){
+                if(f_onError) {
+                    var error = {
+                        name: 'InvalidOperation',
+                        message: errorMessage    
+                    };
+                    
+                    f_onError(error);
+                }
+            };
 
             return {
                 getControlPrefix: function() {
@@ -283,10 +294,8 @@ var expEd = function() {
                             built.add(newToken);
                         }
                         else {
-                            if(f_onError) {
-                                f_onError('Tokens can only be added after operators and operators can only be added after tokens');
-                                return;
-                            }
+                            raiseError('Tokens can only be added after operators and operators can only be added after tokens');
+                            return;
                         }
                     }
                     else {
@@ -303,9 +312,8 @@ var expEd = function() {
                                 selected.splice(i, 1);
                             }
                             else {
-                                if(f_onError) {
-                                    f_onError('Tokens can only be added after operators and operators can only be added after tokens');
-                                }
+                                raiseError('Tokens can only be added after operators and operators can only be added after tokens');
+                                return;
                             }
                         }
                     }
@@ -340,9 +348,8 @@ var expEd = function() {
 
                     }
                     else if(selectedCount === 1 && selected[0].getIsToken()) {
-                        if(f_onError) {
-                            f_onError('More then one token should be selected to make a group');
-                        }
+                        raiseError('More then one token should be selected to make a group');
+                        return;
                     }
                     else if(selectedCount >= 2) {
                         var mostLeftSelectedNode = null,
@@ -372,7 +379,7 @@ var expEd = function() {
 
                         if( (mostLeftSelectedToken.getIsToken() === false && mostLeftSelectedToken.getIsGroup() === false) ||
                         (mostRightSelectedToken.getIsToken() === false && mostRightSelectedToken.getIsGroup() === false) ) {
-                            f_onError('Left and right parts of a group cannot be operators');
+                            raiseError('Left and right parts of a group cannot be operators');
                             return;
                         }
 

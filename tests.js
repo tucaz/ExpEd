@@ -22,6 +22,49 @@ $(document).ready( function () {
         equal($('#' + editor.getControlPrefix() + '-clear-all').length, 1, 'Clear all selected button found');
     });
 
+    //Test cases in this module to make sure Issue #1 is fixed
+    module("Editor error handling")
+    test('Should not throw exception without onError method set', function () {
+        expect(1);
+
+        var editor = new expEd.Editor({
+            expressionContainer: $('#expression'),
+            tokens: [{
+                name: 'Values',
+                values: ['1', '2', '3','4', '5', '6','7', '8', '9','0']
+            }],
+            operators: ['OR','AND']
+        });
+
+        editor.addToken('1');
+        editor.addToken('OR');
+        editor.addToken('OR');
+
+        ok(true, 'Everything is fine');
+    });
+
+    test('Should call onError callback', function () {
+        expect(1);
+
+        var editor = new expEd.Editor({
+            expressionContainer: $('#expression'),
+            tokens: [{
+                name: 'Values',
+                values: ['1', '2', '3','4', '5', '6','7', '8', '9','0']
+            }],
+            operators: ['OR','AND']
+        });
+
+        editor.onError( function(e) {
+            ok(e != null, 'method called')
+        })
+
+        editor.addToken('1');
+        editor.addToken('OR');
+        editor.addToken('OR');
+
+    });
+
     module("Editor blocking operator and token sequences", {
         setup: function() {
             var that = this;
@@ -89,7 +132,7 @@ $(document).ready( function () {
         expect(2);
 
         this.editor.onError( function(e) {
-            equal(e, 'Tokens can only be added after operators and operators can only be added after tokens', 'error should be fired: ' + e);
+            equal(e.message, 'Tokens can only be added after operators and operators can only be added after tokens', 'error should be fired: ' + e.message);
         })
 
         addOrOp();
@@ -100,7 +143,7 @@ $(document).ready( function () {
         expect(1);
 
         this.editor.onError( function(e) {
-            ok(false, 'error should not be fired: ' + e);
+            ok(false, 'error should not be fired: ' + e.message);
         })
 
         this.editor.addToken(this.data[0].values[0]);
@@ -111,7 +154,7 @@ $(document).ready( function () {
         expect(2);
 
         this.editor.onError( function(e) {
-            equal(e, 'Tokens can only be added after operators and operators can only be added after tokens', 'error should be fired: ' + e);
+            equal(e.message, 'Tokens can only be added after operators and operators can only be added after tokens', 'error should be fired: ' + e.message);
         })
 
         addAndOp();
@@ -123,7 +166,7 @@ $(document).ready( function () {
         expect(1);
 
         this.editor.onError( function(e) {
-            ok(false, 'error should not be fired: ' + e);
+            ok(false, 'error should not be fired: ' + e.message);
         })
 
         this.editor.addToken(this.data[0].values[0]);
@@ -137,7 +180,7 @@ $(document).ready( function () {
         expect(1);
 
         this.editor.onError( function(e) {
-            ok(false, 'error should not be fired: ' + e);
+            ok(false, 'error should not be fired: ' + e.message);
         })
 
         this.editor.addToken(this.data[0].values[0]);
@@ -151,7 +194,7 @@ $(document).ready( function () {
         expect(2);
 
         this.editor.onError( function(e) {
-            equal('Tokens can only be added after operators and operators can only be added after tokens', e, 'error should be fired: ' + e);
+            equal('Tokens can only be added after operators and operators can only be added after tokens', e.message, 'error should be fired: ' + e);
         })
 
         this.editor.addToken(this.data[0].values[0]);
@@ -183,7 +226,7 @@ $(document).ready( function () {
         expect(1);
 
         this.editor.onError( function(e) {
-            equal(e, 'More then one token should be selected to make a group', 'error should be fired: ' + e);
+            equal(e.message, 'More then one token should be selected to make a group', 'error should be fired: ' + e.message);
         })
 
         this.editor.addToken(this.data[0].values[0]);
@@ -196,7 +239,7 @@ $(document).ready( function () {
         expect(1);
 
         this.editor.onError( function(e) {
-            equal(e, 'Left and right parts of a group cannot be operators', 'error should be fired: ' + e);
+            equal(e.message, 'Left and right parts of a group cannot be operators', 'error should be fired: ' + e.message);
         })
 
         this.editor.addToken(this.data[0].values[0]);
@@ -214,7 +257,7 @@ $(document).ready( function () {
         expect(1);
 
         this.editor.onError( function(e) {
-            equal(e, 'Left and right parts of a group cannot be operators', 'error should be fired: ' + e);
+            equal(e.message, 'Left and right parts of a group cannot be operators', 'error should be fired: ' + e.message);
         })
 
         this.editor.addToken(this.data[0].values[0]);
@@ -232,7 +275,7 @@ $(document).ready( function () {
         expect(2);
 
         this.editor.onError( function(e) {
-            ok(false, 'error should not be fired: ' + e);
+            ok(false, 'error should not be fired: ' + e.message);
         })
 
         this.editor.addToken(this.data[0].values[0]);
@@ -253,7 +296,7 @@ $(document).ready( function () {
         expect(3);
 
         this.editor.onError( function(e) {
-            ok(false, 'error should not be fired: ' + e);
+            ok(false, 'error should not be fired: ' + e.message);
         })
 
         this.editor.addToken(this.data[0].values[0]);
@@ -351,7 +394,7 @@ $(document).ready( function () {
         expect(1);
 
         this.editor.onError( function(e) {
-            ok(false, 'error should not be fired: ' + e);
+            ok(false, 'error should not be fired: ' + e.message);
         })
 
         this.editor.addToken(this.data[0].values[0]);
@@ -363,7 +406,7 @@ $(document).ready( function () {
         expect(1);
 
         this.editor.onError( function(e) {
-            ok(false, 'error should not be fired: ' + e);
+            ok(false, 'error should not be fired: ' + e.message);
         })
 
         addAndOp();
@@ -375,7 +418,7 @@ $(document).ready( function () {
         expect(1);
 
         this.editor.onError( function(e) {
-            ok(false, 'error should not be fired: ' + e);
+            ok(false, 'error should not be fired: ' + e.message);
         })
 
         this.editor.addToken(this.data[0].values[0]);
@@ -389,7 +432,7 @@ $(document).ready( function () {
         expect(1);
 
         this.editor.onError( function(e) {
-            ok(false, 'error should not be fired: ' + e);
+            ok(false, 'error should not be fired: ' + e.message);
         })
 
         this.editor.addToken(this.data[0].values[0]);
@@ -402,7 +445,7 @@ $(document).ready( function () {
         expect(1);
 
         this.editor.onError( function(e) {
-            ok(false, 'error should not be fired: ' + e);
+            ok(false, 'error should not be fired: ' + e.message);
         })
 
         this.editor.addToken(this.data[0].values[0]);
