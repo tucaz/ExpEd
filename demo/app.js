@@ -22,8 +22,8 @@ $(document).ready( function () {
 
     editor.createUI($('#controls'));
 
-    editor.onError( function(msg) {
-        alert(msg)
+    editor.onError( function(e) {
+        alert(e.message)
     });
 
     $('#show').click( function(e) {

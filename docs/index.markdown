@@ -71,8 +71,8 @@ If you want to use it without the default token/operator/buttons selection (whic
         operators: ['+','-','/','%','*']
     });
 
-    editor.onError( function(msg) {
-        alert(msg)
+    editor.onError( function(e) {
+        alert(e.message)
     });
 
     $('#add-token').click( function(e) {
@@ -148,7 +148,7 @@ allowTokenSequence | Boolean value indicating wheter two value tokens or more ca
 
 Event | Description |
 :------------|:------------|
-onError | Event called when some unauthorized operation is executed in the Editor. The callback method should expect a parameter with the error message |
+onError | Event called when some unauthorized operation is executed in the Editor. The callback method should expect a parameter with the error object |
 
 #### Unauthorized operations include: 
 

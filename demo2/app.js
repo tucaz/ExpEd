@@ -4,8 +4,8 @@ $(document).ready( function () {
         operators: ['+','-','/','%','*']
     });
 
-    editor.onError( function(msg) {
-        alert(msg)
+    editor.onError( function(e) {
+        alert(e.message)
     });
 
     $('#add-token').click( function(e) {

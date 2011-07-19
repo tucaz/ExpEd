@@ -1,13 +1,12 @@
 var expEd = function() {
-
+    
     return {
-
         Token: function(value, text) {
             var v = value,
             t = text,
             f_onSelect = null,
             f_onDeselect = null,
-            $obj = $('<div>'),
+            $obj = jQuery('<div>'),
             that = this;
 
             return {
@@ -72,11 +71,11 @@ var expEd = function() {
                     .unbind('mouseout')
                     .unbind('click')
                     .mouseover( function(e) {
-                        $(this).addClass('selectableHover')
+                        jQuery(this).addClass('selectableHover')
                     })
 
                     .mouseout( function (e) {
-                        $(this).removeClass('selectableHover')
+                        jQuery(this).removeClass('selectableHover')
                     })
 
                     .click( function(e) {
@@ -151,7 +150,18 @@ var expEd = function() {
                 }
 
                 return valid;
-            }
+            };
+            
+            var raiseError = function(errorMessage){
+                if(f_onError) {
+                    var error = {
+                        name: 'InvalidOperation',
+                        message: errorMessage    
+                    };
+                    
+                    f_onError(error);
+                }
+            };
 
             return {
                 getControlPrefix: function() {
@@ -165,10 +175,10 @@ var expEd = function() {
                     controls = controlsContainer;
 
                     for(var i = 0; i < dataCount; i++) {
-                        var $label = $('<label>'),
-                        $select = $('<select>'),
-                        $addButton = $('<input type="button" value="Add">'),
-                        $br = $('<br>'),
+                        var $label = jQuery('<label>'),
+                        $select = jQuery('<select>'),
+                        $addButton = jQuery('<input type="button" value="Add">'),
+                        $br = jQuery('<br>'),
                         _data = data[i];
 
                         $label.text(data[i].name);
@@ -197,7 +207,7 @@ var expEd = function() {
                                 tokenValue = tokenValue + _data.sufix;
                             }
 
-                            $option = $('<option value="' + tokenValue + '">' + tokenText + '</option>');
+                            $option = jQuery('<option value="' + tokenValue + '">' + tokenText + '</option>');
 
                             $select.append($option);
                         }
@@ -212,7 +222,7 @@ var expEd = function() {
                     var opCount = operators.length;
 
                     for(var i = 0; i < opCount; i++) {
-                        var $addOp = $('<input type="button">');
+                        var $addOp = jQuery('<input type="button">');
 
                         $addOp.attr('id', controlPrefix + '-add-op-' + i);
                         $addOp.val('Add ' + operators[i]);
@@ -227,7 +237,7 @@ var expEd = function() {
                     }
 
                     //adding group selected button
-                    var $group = $('<input type="button">');
+                    var $group = jQuery('<input type="button">');
                     $group.attr('id', controlPrefix + '-group');
                     $group.val('Group/Ungroup selected');
                     $group.click( function(e) {
@@ -237,7 +247,7 @@ var expEd = function() {
                     controls.append($group);
 
                     //adding unselect all button
-                    var $unselectAll = $('<input type="button">');
+                    var $unselectAll = jQuery('<input type="button">');
                     $unselectAll.attr('id', controlPrefix + '-unselect-all');
                     $unselectAll.val('Unselect All');
                     $unselectAll.click( function(e) {
@@ -247,7 +257,7 @@ var expEd = function() {
                     controls.append($unselectAll);
 
                     //adding remove selected button
-                    var $remove = $('<input type="button">');
+                    var $remove = jQuery('<input type="button">');
                     $remove.attr('id', controlPrefix + '-remove');
                     $remove.val('Remove Selected');
                     $remove.click( function(e) {
@@ -257,7 +267,7 @@ var expEd = function() {
                     controls.append($remove);
 
                     //adding clear selected selected button
-                    var $clearAll = $('<input type="button">');
+                    var $clearAll = jQuery('<input type="button">');
                     $clearAll.attr('id', controlPrefix + '-clear-all');
                     $clearAll.val('Clear All');
                     $clearAll.click( function(e) {
@@ -284,10 +294,8 @@ var expEd = function() {
                             built.add(newToken);
                         }
                         else {
-                            if(f_onError) {
-                                f_onError('Tokens can only be added after operators and operators can only be added after tokens');
-                                return;
-                            }
+                            raiseError('Tokens can only be added after operators and operators can only be added after tokens');
+                            return;
                         }
                     }
                     else {
@@ -304,9 +312,8 @@ var expEd = function() {
                                 selected.splice(i, 1);
                             }
                             else {
-                                if(f_onError) {
-                                    f_onError('Tokens can only be added after operators and operators can only be added after tokens');
-                                }
+                                raiseError('Tokens can only be added after operators and operators can only be added after tokens');
+                                return;
                             }
                         }
                     }
@@ -341,9 +348,8 @@ var expEd = function() {
 
                     }
                     else if(selectedCount === 1 && selected[0].getIsToken()) {
-                        if(f_onError) {
-                            f_onError('More then one token should be selected to make a group');
-                        }
+                        raiseError('More then one token should be selected to make a group');
+                        return;
                     }
                     else if(selectedCount >= 2) {
                         var mostLeftSelectedNode = null,
@@ -373,7 +379,7 @@ var expEd = function() {
 
                         if( (mostLeftSelectedToken.getIsToken() === false && mostLeftSelectedToken.getIsGroup() === false) ||
                         (mostRightSelectedToken.getIsToken() === false && mostRightSelectedToken.getIsGroup() === false) ) {
-                            f_onError('Left and right parts of a group cannot be operators');
+                            raiseError('Left and right parts of a group cannot be operators');
                             return;
                         }
 
