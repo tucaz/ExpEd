@@ -506,7 +506,7 @@ var expEd = function() {
 
                         while(charsToParse > 0 && !groupFound) {
                             for(charIndex = 0; charIndex <= charsToParse; charIndex++) {
-                                if(stringToParse[charIndex] === groupInitialDelimiter) {
+                                if(stringToParse.charAt(charIndex) === groupInitialDelimiter) {
                                     groupFound = true;
                                     //Back to previous character so the outer
                                     // function won't miss it
@@ -514,27 +514,27 @@ var expEd = function() {
                                     break;
                                 }
 
-                                if(initialIndex === -1 && stringToParse[charIndex] === initialDelimiter) {
+                                if(initialIndex === -1 && stringToParse.charAt(charIndex) === initialDelimiter) {
                                     initialIndex = charIndex;
-                                    currentToken = currentToken + stringToParse[charIndex];
+                                    currentToken = currentToken + stringToParse.charAt(charIndex);
                                     continue;
                                 }
 
                                 if(initialIndex > -1 && finalIndex === -1) {
-                                    if(stringToParse[charIndex] != initialDelimiter && stringToParse[charIndex] != finalDelimiter) {
-                                        currentToken = currentToken + stringToParse[charIndex];
+                                    if(stringToParse.charAt(charIndex) != initialDelimiter && stringToParse.charAt(charIndex) != finalDelimiter) {
+                                        currentToken = currentToken + stringToParse.charAt(charIndex);
                                         continue;
                                     }
 
-                                    if(stringToParse[charIndex] === finalDelimiter) {
+                                    if(stringToParse.charAt(charIndex) === finalDelimiter) {
                                         finalIndex = charIndex;
-                                        currentToken = currentToken + stringToParse[charIndex];
+                                        currentToken = currentToken + stringToParse.charAt(charIndex);
                                         break;
                                     }
                                 }
 
                                 if(initialIndex === -1 && finalIndex === -1) {
-                                    currentOp = currentOp + stringToParse[charIndex];
+                                    currentOp = currentOp + stringToParse.charAt(charIndex);
                                     continue;
                                 }
                             }
@@ -575,12 +575,12 @@ var expEd = function() {
 
                         while(charsToParse > 0) {
                             for(charIndex = 0; charIndex <= charsToParse; charIndex++) {
-                                if(initialIndex === -1 && stringToParse[charIndex] === groupInitialDelimiter) {
+                                if(initialIndex === -1 && stringToParse.charAt(charIndex) === groupInitialDelimiter) {
                                     initialIndex = charIndex;
                                     continue;
                                 }
 
-                                if(initialIndex > -1 && finalIndex === -1 && stringToParse[charIndex] === groupFinalDelimiter) {
+                                if(initialIndex > -1 && finalIndex === -1 && stringToParse.charAt(charIndex) === groupFinalDelimiter) {
                                     finalIndex = charIndex;
 
                                     var valueExpressionToParse = stringToParse.substring(initialIndex + 1, finalIndex - initialIndex);
@@ -613,7 +613,7 @@ var expEd = function() {
 
                     while(_charsToParse > 0) {
                         for(_charIndex = 0; _charIndex <= _charsToParse; _charIndex++) {
-                            if(_stringToParse[_charIndex] === groupInitialDelimiter) {
+                            if(_stringToParse.charAt(_charIndex) === groupInitialDelimiter) {
                                 var r = parseGroupExpression(_stringToParse);
                                 var groupTokens = r.Result;
 
